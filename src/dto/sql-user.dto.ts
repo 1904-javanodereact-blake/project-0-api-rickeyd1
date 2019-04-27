@@ -7,4 +7,5 @@ export class SqlUser {
     last_name = '';
     email = '';
     role = undefined;
+    img = '';
 }

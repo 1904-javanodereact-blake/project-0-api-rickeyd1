@@ -4,10 +4,14 @@ import * as reimburseDao from '../daos/reimbursement.dao';
 
 /**
  * Reimbursement router will handle all requests starting with
- * /reimbursement
+ * /reimbursements
  */
  export const reimbursementRouter = express.Router();
 
+ /**
+  * Finds all reimbursements that share a common status
+  * endpoint: /reimbursements/status/:statusid/date-submitted
+  */
  reimbursementRouter.get('/status/:statusid/date-submitted',
  [authMiddleware(['admin', 'finance-manager']), async (req, res) => {
    console.log(`Server is getting reimbursements with status: ${req.params.statusid}...`);
@@ -26,7 +30,8 @@ import * as reimburseDao from '../daos/reimbursement.dao';
 
  }]);
 
- reimbursementRouter.get('/author/userId/:userId/date-submitted', [(req, res, next) => {
+ reimbursementRouter.get('/author/userId/:userId/date-submitted', [
+   /*(req, res, next) => {
    const userID: number = req.session.user.userId;
    const userRole: string = req.session.user.role.role;
    if ( userID === +req.params.userId ) {
@@ -39,7 +44,7 @@ import * as reimburseDao from '../daos/reimbursement.dao';
       };
       res.status(401).json(resp);
    }
-}, async (req, res) => {
+},*/ async (req, res) => {
    const userID = +req.params.userId;
    const { start, end } = req.query;
    const startDate = new Date(+start);

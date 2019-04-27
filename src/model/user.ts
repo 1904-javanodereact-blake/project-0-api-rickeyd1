@@ -8,9 +8,10 @@ export class User {
     lastName: string;   // not null
     email: string;      // not null
     role: Role;         // not null
+    img: string;
 
     constructor(userId = 0, username = '', password = '',
-    firstName = '', lastName = '', email = '', role: Role) {
+    firstName = '', lastName = '', email = '', role: Role, img = '') {
         this.userId = userId;
         this.username = username;
         this.password = password;
@@ -18,5 +19,6 @@ export class User {
         this.lastName = lastName;
         this.email = email;
         this.role = role;
+        this.img = img;
     }
 }

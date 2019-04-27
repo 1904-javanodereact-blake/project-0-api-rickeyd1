@@ -8,14 +8,24 @@ import * as userDao from '../daos/users.dao';
  */
 export const userRouter = express.Router();
 
-userRouter.get('', async (req, res) => {
+/**
+ * Finds all users
+ * enpoint: /users
+ * method: GET
+ */
+userRouter.get('', [authMiddleware(['admin', 'finance-manager']), async (req, res) => {
     console.log('Retrieving users...');
     const user = await userDao.findAllUsers();
     res.json(user);
-});
+}]);
 
 // [authMiddleware(['admin', 'finance-manager']),
 
+/**
+ * Finds a user by their user id
+ * endpoint: /users/:id
+ * method: GET
+ */
 userRouter.get('/:id', [(req, res, next) => {
     const userID: number = req.session.user.userId;
     const userRole: string = req.session.user.role.role;
@@ -42,6 +52,11 @@ userRouter.get('/:id', [(req, res, next) => {
     }
 }]);
 
+/**
+ * Updates a user record in our database.
+ * endpoint: /users
+ * method: POST
+ */
 userRouter.patch('', [authMiddleware(['admin']), async (req, res) => {
     console.log(`Patching user with new data...`);
     const { userId } = req.body;
