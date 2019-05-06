@@ -2,6 +2,7 @@ import { PoolClient } from 'pg';
 import { connectionPool } from '.';
 import { convertSqlUser } from '../util/sql-user-converter';
 import { converSqlRole } from '../util/sql-role-converter';
+import { convertSqlUserPass } from '../util/sql-user-with-pass';
 
 export async function findAllUsers() {
     let client: PoolClient;
@@ -62,6 +63,30 @@ export async function findUserByID(userID: number) {
         const user = result.rows[0];
         if (user) {
             const convertedUser = convertSqlUser(user);
+            convertedUser.role = converSqlRole(user);
+            return convertedUser;
+        } else {
+            return undefined;
+        }
+    } catch (err) {
+        console.log(err);
+        return undefined;
+    } finally {
+        client && client.release();
+    }
+}
+
+export async function findUserWithPassword(userID: number) {
+    let client: PoolClient;
+    try {
+        client = await connectionPool.connect();
+        const queryString = `SELECT * FROM arrest_dev.users as u
+        INNER JOIN arrest_dev.role as r ON (u.role = r.role_id)
+        WHERE user_id = $1`;
+        const result = await client.query(queryString, [userID]);
+        const user = result.rows[0];
+        if (user) {
+            const convertedUser = convertSqlUserPass(user);
             convertedUser.role = converSqlRole(user);
             return convertedUser;
         } else {

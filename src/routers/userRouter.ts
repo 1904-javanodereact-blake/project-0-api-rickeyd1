@@ -52,6 +52,17 @@ userRouter.get('/:id', [(req, res, next) => {
     }
 }]);
 
+userRouter.get('/employee/:id', async (req, res) => {
+    const id: number = +req.params.id;
+    console.log(`Getting user with id: ${req.params.id}...`);
+    const user = await userDao.findUserByID(id);
+    if (user) {
+        res.json(user);
+    } else {
+        res.sendStatus(404);
+    }
+});
+
 /**
  * Updates a user record in our database.
  * endpoint: /users
@@ -60,17 +71,17 @@ userRouter.get('/:id', [(req, res, next) => {
 userRouter.patch('', [authMiddleware(['admin']), async (req, res) => {
     console.log(`Patching user with new data...`);
     const { userId } = req.body;
-    const user = await userDao.findUserByID(userId);
+    const user = await userDao.findUserWithPassword(userId);
     const newUser = user;
-
+    // console.log(user);
     for (const field in newUser) {
-        if ( (newUser[field] !== req.body[field]) && (req.body[field] !== undefined)) {
+        if ( (newUser[field] !== req.body[field]) && req.body[field] !== undefined ) {
             newUser[field] = req.body[field];
         }
     }
     await userDao.updateUser(user.userId, newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email,
         newUser.role);
-
+    console.log(newUser);
     console.log(`User ${userId} has been updated`);
     const updateUser = await userDao.findUserByID(userId);
     res.send(updateUser);

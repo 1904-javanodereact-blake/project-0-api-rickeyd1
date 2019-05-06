@@ -31,7 +31,7 @@ import * as reimburseDao from '../daos/reimbursement.dao';
  }]);
 
  reimbursementRouter.get('/author/userId/:userId/date-submitted', [
-   /*(req, res, next) => {
+   (req, res, next) => {
    const userID: number = req.session.user.userId;
    const userRole: string = req.session.user.role.role;
    if ( userID === +req.params.userId ) {
@@ -44,7 +44,7 @@ import * as reimburseDao from '../daos/reimbursement.dao';
       };
       res.status(401).json(resp);
    }
-},*/ async (req, res) => {
+}, async (req, res) => {
    const userID = +req.params.userId;
    const { start, end } = req.query;
    const startDate = new Date(+start);
@@ -61,20 +61,20 @@ import * as reimburseDao from '../daos/reimbursement.dao';
  }]);
 
  reimbursementRouter.post('', async (req, res) => {
-   const { reimbursementID } = req.body;
-
-   if ( reimbursementID === 0 ) {
-      const { author, amount, dateSubmitted, dateResolved, description, resolver, status, type } = req.body;
-
-      const newImburse = await reimburseDao.submitReimbursement(author, amount, dateSubmitted, dateResolved, description,
-         resolver, status, type);
-
-      res.status(201).json(newImburse);
-
-      console.log(`New reimbursement added`);
+   if (req.session.user) {
+      const { reimbursementID } = req.body;
+      if ( reimbursementID === 0 ) {
+         const { amount, description, type } = req.body;
+         const newImburse = await reimburseDao.submitReimbursement(req.session.user.userId, amount, new Date().toLocaleString(), description,
+            1, type);
+         res.status(201).json(newImburse);
+         console.log(`New reimbursement added`);
+      } else {
+         res.send('Could not create new reimbursement. Please include reimbursement id of 0');
+         console.log('Failed to create new record.');
+      }
    } else {
-      res.send('Could not create new reimbursement. Please include reimbursement id of 0');
-      console.log('Failed to create new record.');
+      res.status(401).send('Please Login as user before submitting a reimbursement');
    }
  });
 
@@ -89,8 +89,8 @@ import * as reimburseDao from '../daos/reimbursement.dao';
          newReim[field] = req.body[field];
       }
    }
-   await reimburseDao.updateReimbursement(newReim.reimbursementID, newReim.author, newReim.amount, newReim.dateSubmitted,
-      newReim.dateResolved, newReim.description, newReim.resolver, newReim.status, newReim.type);
+   await reimburseDao.updateReimbursement(newReim.reimbursementID, currReim.author, newReim.amount, currReim.dateSubmitted,
+      new Date().toLocaleString(), newReim.description, req.session.user.userId, newReim.status, newReim.type);
    const updatedReim = await reimburseDao.findReimbursementByID(reimbursementID);
    res.send(updatedReim);
    console.log(`Finished updating reimbursement information...`);

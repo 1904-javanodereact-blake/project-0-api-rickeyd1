@@ -47,13 +47,13 @@ export async function findReimbursementByUser(userId, start, end) {
     }
 }
 
-export async function submitReimbursement( author, amount, dateSubmitted, dateResolved, description, resolver, status, type) {
+export async function submitReimbursement( author, amount, dateSubmitted, description, status, type) {
     let client: PoolClient;
     try {
         client = await connectionPool.connect();
-        const queryString = `INSERT INTO arrest_dev.reimbursement (author, amount, date_submitted, date_resolved, description, resolver, status, type)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
-        const result = await client.query(queryString, [author, amount, dateSubmitted, dateResolved, description, resolver, status, type]);
+        const queryString = `INSERT INTO arrest_dev.reimbursement (author, amount, date_submitted, description, status, type)
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+        const result = await client.query(queryString, [author, amount, dateSubmitted, description, status, type]);
         const reimbursements = result.rows;
         if ( reimbursements ) {
             const convertedReimbur = reimbursements.map(convertSqlReimburse);

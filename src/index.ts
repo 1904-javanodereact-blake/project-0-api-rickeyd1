@@ -10,11 +10,12 @@ const port = process.env.SHIP_PORT || 8080;
 
 app.use(bodyParser.json());
 
+
 app.use(sessionMiddleware);
 
 // allow cross origins
 app.use((req, resp, next) => {
-    console.log(req.get('host'));
+    // console.log(req.get('host'));
     (process.env.SHIP_API_STAGE === 'prod')
       ? resp.header('Access-Control-Allow-Origin', process.env.SHIP_APP_URL)
       : resp.header('Access-Control-Allow-Origin', `${req.headers.origin}`);
@@ -36,12 +37,13 @@ app.post('/login', async (req, res) => {
         const resp = {
             message: 'Invalid credentials'
         };
-        res.status(400).json(resp);
+        res.status(401).json(resp);
     }
 });
 
-app.use('/hi', (req, res) => {
-    res.send('Hi I work.');
+app.get('/logout', async (req, res) => {
+    req.session.destroy(err => console.log(err));
+    res.send('User has been disconnected from the session');
 });
 
 /**
